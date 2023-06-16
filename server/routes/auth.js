@@ -10,7 +10,7 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if the email exists
+    // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -22,7 +22,12 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    return res.status(200).json({ message: "Login successful" });
+    // Generate a JWT token
+    const token = jwt.sign({ userId: user._id }, secretKey, {
+      expiresIn: "1h",
+    });
+
+    return res.status(200).json({ token });
   } catch (error) {
     console.error("Error logging in:", error);
     return res.status(500).json({ message: "Internal server error" });
