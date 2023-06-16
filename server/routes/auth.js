@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 const express = require("express");
 const bcrypt = require("bcrypt");
-
+const jwt = require("jsonwebtoken");
+const config = require("../config");
 const User = require("../models/User.js");
 
 const router = express.Router();
@@ -22,8 +23,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, secretKey, {
+    //Generate a JWT token
+    const token = jwt.sign({ userId: user._id }, config.jwtSecret, {
       expiresIn: "1h",
     });
 
