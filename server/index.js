@@ -14,13 +14,16 @@ app.use(cors());
 
 app.use(
   cors({
-    origin: "http://localhost:5175",
+    origin: "https://vaccination-booking-system.vercel.app",
     credentials: true,
   })
 );
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5175"); // Replace with the origin of your frontend application
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://vaccination-booking-system.vercel.app"
+  ); // Replace with the origin of your frontend application
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true"); // Allow credentials (cookies)
