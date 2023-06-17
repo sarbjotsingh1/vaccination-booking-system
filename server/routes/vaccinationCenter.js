@@ -8,13 +8,6 @@ router.post("/add", async (req, res) => {
   try {
     const { ID, name, address, city, workingHours } = req.body;
 
-    // Check if the user is an admin
-    // if (!isAdmin) {
-    //   return res
-    //     .status(401)
-    //     .json({ message: "Only admin users can add vaccination centers" });
-    // }
-
     // Create a new vaccination center
     const newVaccinationCenter = new VaccinationCenter({
       ID,
@@ -42,11 +35,11 @@ router.delete("/remove/:id", async (req, res) => {
     //const isAdmin = req.body.isAdmin;
 
     //Check if the user is an admin
-    if (!isAdmin) {
-      return res
-        .status(401)
-        .json({ message: "Only admin users can remove vaccination centers" });
-    }
+    // if (!isAdmin) {
+    //   return res
+    //     .status(401)
+    //     .json({ message: "Only admin users can remove vaccination centers" });
+    // }
 
     // Find the vaccination center by ID and remove it
     await VaccinationCenter.findOneAndRemove({ ID: id });
@@ -136,13 +129,14 @@ router.get("/:id", async (req, res) => {
   }
 });
 router.post("/apply", async (req, res) => {
-  const { centerId, date } = req.body;
+  const { centerId, date, name } = req.body;
 
   try {
     // Create a new vaccination application
     const newVaccinationApplication = new VaccinationApplication({
       center: centerId,
       date,
+      name,
     });
 
     await newVaccinationApplication.save();
@@ -165,7 +159,7 @@ router.get("/slots-booked", async (req, res) => {
 
     if (!center) {
       // Vaccination center not found
-      return res.json({ slotsBooked: 0 });
+      return res.json(0);
     }
 
     const slotsBooked = await VaccinationApplication.aggregate([
@@ -185,10 +179,10 @@ router.get("/slots-booked", async (req, res) => {
 
     const count = slotsBooked.length > 0 ? slotsBooked[0].count : 0;
 
-    res.json({ slotsBooked: count });
+    res.json(count);
   } catch (error) {
     console.error("Error retrieving slots booked:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json("Internal server error");
   }
 });
 

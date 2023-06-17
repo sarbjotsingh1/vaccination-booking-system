@@ -54,6 +54,58 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Admin login endpoint
+router.post("/auth-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email" });
+    }
+
+    // Validate the password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Check if the user is an admin
+    const isAdmin = user.isAdmin;
+
+    if (!isAdmin) {
+      return res
+        .status(401)
+        .json({ message: "Only admins are allowed access" });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign({ userId: user._id }, config.jwtSecret, {
+      expiresIn: "1h",
+    });
+
+    // Store the token and isAdmin as cookies
+    const cookieOptions = {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 3600, // 1 hour (in seconds)
+      path: "/", // Set the cookie path to the root
+    };
+
+    res.setHeader("Set-Cookie", [
+      cookie.serialize("jwt", token, cookieOptions),
+      cookie.serialize("isAdmin", String(isAdmin), cookieOptions),
+    ]);
+
+    return res.status(200).json({ token, isAdmin });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // Logout route
 router.post("/logout", (req, res) => {
   // Clear the authentication token from client-side (e.g., cookies, local storage)
