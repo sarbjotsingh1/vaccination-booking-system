@@ -1,6 +1,6 @@
 const express = require("express");
 const VaccinationCenter = require("../models/vaccinationCenter");
-const VaccinationSlot = require("../models/vaccinationSlot");
+const VaccinationApplication = require("../models/vaccinationApplication");
 
 const router = express.Router();
 // Add Vaccination Center route
@@ -41,12 +41,12 @@ router.delete("/remove/:id", async (req, res) => {
     const { id } = req.params;
     //const isAdmin = req.body.isAdmin;
 
-    // Check if the user is an admin
-    // if (!isAdmin) {
-    //   return res
-    //     .status(401)
-    //     .json({ message: "Only admin users can remove vaccination centers" });
-    // }
+    //Check if the user is an admin
+    if (!isAdmin) {
+      return res
+        .status(401)
+        .json({ message: "Only admin users can remove vaccination centers" });
+    }
 
     // Find the vaccination center by ID and remove it
     await VaccinationCenter.findOneAndRemove({ ID: id });
@@ -117,43 +117,6 @@ router.get("/search", async (req, res) => {
 });
 // Assuming you have a VaccinationSlot model to store the slots
 
-// Apply for a vaccination slot route
-router.post("/apply", async (req, res) => {
-  const { centerId, slotId } = req.body;
-
-  try {
-    // Find the vaccination center
-    const vaccinationCenter = await VaccinationCenter.findById(centerId);
-    if (!vaccinationCenter) {
-      return res.status(404).json({ message: "Vaccination center not found" });
-    }
-
-    // Find the vaccination slot
-    const vaccinationSlot = await VaccinationSlot.findById(slotId);
-    if (!vaccinationSlot) {
-      return res.status(404).json({ message: "Vaccination slot not found" });
-    }
-
-    // Check if there are available slots
-    if (vaccinationSlot.availableSlots <= 0) {
-      return res.status(400).json({ message: "No available slots" });
-    }
-
-    // Decrease the available slots count and save the updated vaccination slot
-    vaccinationSlot.availableSlots -= 1;
-    await vaccinationSlot.save();
-
-    // ... Additional logic to handle the user applying for the vaccination slot
-
-    return res
-      .status(200)
-      .json({ message: "Vaccination slot applied successfully" });
-  } catch (error) {
-    console.error("Error applying for vaccination slot:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
-
 // Get a specific vaccination center
 router.get("/:id", async (req, res) => {
   try {
@@ -172,39 +135,60 @@ router.get("/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+router.post("/apply", async (req, res) => {
+  const { centerId, date } = req.body;
 
-router.put("/:centerId/reduce-slots", async (req, res) => {
   try {
-    const { centerId } = req.params;
-
-    // Find the vaccination center by ID
-    const vaccinationCenter = await VaccinationCenter.findById(centerId);
-
-    if (!vaccinationCenter) {
-      return res.status(404).json({ message: "Vaccination center not found" });
-    }
-
-    // Decrease the available slots count
-    if (vaccinationCenter.maxCandidatesPerDay <= 0) {
-      return res.status(400).json({ message: "No available slots" });
-    }
-
-    vaccinationCenter.maxCandidatesPerDay -= 1;
-    await vaccinationCenter.save();
-
-    // Create a new vaccination slot entry
-    const newVaccinationSlot = new VaccinationSlot({
+    // Create a new vaccination application
+    const newVaccinationApplication = new VaccinationApplication({
       center: centerId,
-      date: new Date(),
-      availableSlots: vaccinationCenter.maxCandidatesPerDay,
+      date,
     });
 
-    await newVaccinationSlot.save();
+    await newVaccinationApplication.save();
 
-    return res.status(200).json({ message: "Slots reduced successfully" });
+    return res
+      .status(201)
+      .json({ message: "Vaccination application submitted successfully" });
   } catch (error) {
-    console.error("Error reducing slots:", error);
+    console.error("Error submitting vaccination application:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// GET /vaccination-application/slots-booked?centerId=<centerId>&date=<date>
+router.get("/slots-booked", async (req, res) => {
+  try {
+    const { centerId, date } = req.query;
+
+    const center = await VaccinationCenter.findById(centerId);
+
+    if (!center) {
+      // Vaccination center not found
+      return res.json({ slotsBooked: 0 });
+    }
+
+    const slotsBooked = await VaccinationApplication.aggregate([
+      {
+        $match: {
+          center: mongoose.Types.ObjectId(centerId),
+          date: new Date(date),
+        },
+      },
+      {
+        $group: {
+          _id: { center: "$center", date: "$date" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const count = slotsBooked.length > 0 ? slotsBooked[0].count : 0;
+
+    res.json({ slotsBooked: count });
+  } catch (error) {
+    console.error("Error retrieving slots booked:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

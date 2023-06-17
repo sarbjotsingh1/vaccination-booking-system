@@ -15,8 +15,19 @@ app.use(cors());
 app.use(
   cors({
     origin: "http://localhost:5174",
+    credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5174"); // Replace with the origin of your frontend application
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true"); // Allow credentials (cookies)
+
+  next();
+});
+
 app.use("/auth", authRoutes);
 app.use("/vaccination-center", vaccinationCenterRoutes);
 app.use("/vaccination-applications", vaccinationApplicationsRouter);

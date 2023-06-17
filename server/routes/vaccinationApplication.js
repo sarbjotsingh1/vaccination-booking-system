@@ -5,15 +5,13 @@ const router = express.Router();
 
 // Apply for Vaccination Slot route
 router.post("/apply", async (req, res) => {
-  const { centerId, date, applicantName, applicantEmail } = req.body;
+  const { centerId, date } = req.body;
 
   try {
     // Create a new vaccination application
     const newVaccinationApplication = new VaccinationApplication({
       center: centerId,
       date,
-      applicantName,
-      applicantEmail,
     });
 
     await newVaccinationApplication.save();
