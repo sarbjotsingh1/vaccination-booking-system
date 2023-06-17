@@ -119,18 +119,12 @@ const SearchVaccinationCenter = () => {
 
   return (
     <>
-      <div className="max-w-md p-4">
+      <div className="max-w-md p-4 flex gap-4">
         <div className="flex mb-4">
           <Link to="/user-dashboard">
             <h1 className="text-3xl font-bold text-blue-700 cursor-pointer">
               VacciBook
             </h1>
-          </Link>
-          <Link
-            to="/"
-            className="bg-red-500 text-white px-4 py-2 rounded  hover:bg-red-700 transition-colors duration-300 ease-in-out"
-          >
-            Logout
           </Link>
         </div>
         <div className="flex items-center mb-4">
@@ -178,6 +172,12 @@ const SearchVaccinationCenter = () => {
             </button>
           </div>
         )}
+        <Link
+          to="/"
+          className="bg-red-500 text-white px-2 py-2 rounded hover:bg-red-700 transition-colors duration-300 ease-in-out"
+        >
+          Logout
+        </Link>
       </div>
       {loading ? (
         <p>Loading...</p>
