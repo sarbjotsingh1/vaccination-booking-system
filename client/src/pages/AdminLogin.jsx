@@ -1,35 +1,26 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/tailwind.css";
 import { ArrowRight } from "lucide-react";
 
-const Login = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/auth/auth-login",
+        {
+          email,
+          password,
+        }
+      );
 
       // Handle successful login
       console.log("Logged in:", response.data);
-
-      // Check if the user is an admin based on the response or other logic
-      const isAdmin = response.isAdmin;
-
-      // Redirect to the appropriate dashboard page based on isAdmin value
-      if (isAdmin) {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/user-dashboard");
-      }
     } catch (error) {
       // Handle login error
       console.error("Login failed:", error.message);
@@ -42,18 +33,9 @@ const Login = () => {
         <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
           <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">
             <h2 className="text-3xl font-bold leading-tight text-black sm:text-4xl">
-              Sign in
+              Admin Sign in
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <a
-                href="#"
-                title=""
-                className="font-semibold text-black transition-all duration-200 hover:underline"
-              >
-                Create a free account
-              </a>
-            </p>
+
             <form onSubmit={handleSubmit} className="mt-8">
               <div className="space-y-5">
                 <div>
@@ -82,13 +64,6 @@ const Login = () => {
                     >
                       Password
                     </label>
-                    <a
-                      href="#"
-                      title=""
-                      className="text-sm font-semibold text-black hover:underline"
-                    >
-                      Forgot password?
-                    </a>
                   </div>
                   <div className="mt-2">
                     <input
@@ -125,4 +100,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;

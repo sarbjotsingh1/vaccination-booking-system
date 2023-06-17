@@ -20,7 +20,12 @@ const Home = () => {
         </Link>
         <Link to="/login">
           <button className="bg-gray-800 text-white px-6 py-3 rounded-md text-lg font-medium shadow-md animate__animated animate__bounce">
-            Login
+            User Login
+          </button>
+        </Link>
+        <Link to="/admin-login">
+          <button className="bg-green-600 text-white px-6 py-3 rounded-md text-lg font-medium shadow-md animate__animated animate__bounce">
+            Admin Login
           </button>
         </Link>
       </div>
