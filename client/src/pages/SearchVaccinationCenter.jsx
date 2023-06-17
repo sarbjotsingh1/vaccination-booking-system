@@ -15,6 +15,7 @@ const SearchVaccinationCenter = () => {
   const [vaccinationCenters, setVaccinationCenters] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [name, setName] = useState(""); // New state for the name input
   const [loading, setLoading] = useState(false);
   const [slotsBooked, setSlotsBooked] = useState(0);
 
@@ -80,13 +81,15 @@ const SearchVaccinationCenter = () => {
     if (
       selectedCenter &&
       selectedDate &&
-      slotsBooked < selectedCenter.maxCandidatesPerDay
+      slotsBooked < selectedCenter.maxCandidatesPerDay &&
+      name // Check if name is provided
     ) {
       setLoading(true);
       try {
         const response = await api.post("/vaccination-center/apply", {
           centerId: selectedCenter._id,
           date: selectedDate,
+          name: name, // Pass the name value to the API endpoint
         });
         toast.success("Application submitted successfully!");
         setLoading(false);
@@ -116,8 +119,8 @@ const SearchVaccinationCenter = () => {
 
   return (
     <>
-      <div className="max-w-md p-4  ">
-        <div className="flex mb-4 ">
+      <div className="max-w-md p-4">
+        <div className="flex mb-4">
           <Link to="/user-dashboard">
             <h1 className="text-3xl font-bold text-blue-700 cursor-pointer">
               VacciBook
@@ -151,6 +154,13 @@ const SearchVaccinationCenter = () => {
             <h4 className="text-lg font-bold mb-2">
               Selected Center: {selectedCenter.name}
             </h4>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name" // Added name input field
+              className="flex-grow px-4 py-2 mb-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             {renderDatePicker()}
             <p>
               Slots Booked: {slotsBooked}/{selectedCenter.maxCandidatesPerDay}
@@ -159,7 +169,8 @@ const SearchVaccinationCenter = () => {
               className="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700 transition-colors duration-300 ease-in-out"
               disabled={
                 !selectedDate ||
-                slotsBooked >= selectedCenter.maxCandidatesPerDay
+                slotsBooked >= selectedCenter.maxCandidatesPerDay ||
+                !name // Disable button if name is not provided
               }
               onClick={handleApply}
             >

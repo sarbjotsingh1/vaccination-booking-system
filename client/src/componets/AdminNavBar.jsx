@@ -13,7 +13,7 @@ export const AdminNavBar = () => {
             <a href="/admin/vaccination-slots">Vaccination Slots</a>
           </li>
           <li className="px-4 py-2 hover:bg-gray-800">
-            <a href="/logout">Logout</a>
+            <a href="/">Logout</a>
           </li>
         </ul>
       </nav>
