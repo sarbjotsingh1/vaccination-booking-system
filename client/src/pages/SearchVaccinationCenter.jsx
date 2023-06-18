@@ -1,3 +1,4 @@
+// SearchVaccinationCenter.js
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -15,7 +16,7 @@ const SearchVaccinationCenter = () => {
   const [vaccinationCenters, setVaccinationCenters] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [name, setName] = useState(""); // New state for the name input
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [slotsBooked, setSlotsBooked] = useState(0);
 
@@ -64,7 +65,7 @@ const SearchVaccinationCenter = () => {
 
   const fetchSlotsBooked = async (centerId, date) => {
     try {
-      const response = await api.get("/slots-booked", {
+      const response = await api.get("/vaccination-center/slot-booking", {
         params: {
           centerId,
           date,
@@ -82,14 +83,14 @@ const SearchVaccinationCenter = () => {
       selectedCenter &&
       selectedDate &&
       slotsBooked < selectedCenter.maxCandidatesPerDay &&
-      name // Check if name is provided
+      name
     ) {
       setLoading(true);
       try {
         const response = await api.post("/vaccination-center/apply", {
           centerId: selectedCenter._id,
           date: selectedDate,
-          name: name, // Pass the name value to the API endpoint
+          name: name,
         });
         toast.success("Application submitted successfully!");
         setLoading(false);
@@ -119,7 +120,7 @@ const SearchVaccinationCenter = () => {
 
   return (
     <>
-      <div className="max-w-md p-4 flex gap-4">
+      <div className="max-w-md p-4 gap-4">
         <div className="flex mb-4">
           <Link to="/user-dashboard">
             <h1 className="text-3xl font-bold text-blue-700 cursor-pointer">
@@ -152,7 +153,7 @@ const SearchVaccinationCenter = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name" // Added name input field
+              placeholder="Enter your name"
               className="flex-grow px-4 py-2 mb-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {renderDatePicker()}
@@ -160,45 +161,45 @@ const SearchVaccinationCenter = () => {
               Slots Booked: {slotsBooked}/{selectedCenter.maxCandidatesPerDay}
             </p>
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700 transition-colors duration-300 ease-in-out"
-              disabled={
-                !selectedDate ||
-                slotsBooked >= selectedCenter.maxCandidatesPerDay ||
-                !name // Disable button if name is not provided
-              }
               onClick={handleApply}
+              disabled={loading}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300 ease-in-out"
             >
-              Select Date
+              {loading ? "Applying..." : "Apply"}
             </button>
           </div>
         )}
-        <Link
-          to="/"
-          className="bg-red-500 text-white px-2 py-2 rounded hover:bg-red-700 transition-colors duration-300 ease-in-out"
-        >
-          Logout
-        </Link>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div>
+            {vaccinationCenters.length === 0 ? (
+              <p>No vaccination centers found.</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {vaccinationCenters.map((center) => (
+                  <div
+                    key={center._id}
+                    className="p-4 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSelectCenter(center)}
+                  >
+                    <h3 className="text-lg font-bold mb-2">{center.name}</h3>
+                    <p>
+                      <strong>Address: </strong>
+                      {center.address}, {center.city}
+                    </p>
+                    <p>
+                      <strong>Working Hours: </strong>
+                      {center.workingHours}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="grid w-screen md:grid-cols-3 gap-4">
-          {vaccinationCenters.slice(0, 6).map((center) => (
-            <div key={center._id} className="p-4 bg-gray-100 rounded">
-              <h3 className="text-xl font-bold mb-2">{center.name}</h3>
-              <p className="text-gray-700">{center.address}</p>
-              <p className="text-gray-700">{center.city}</p>
-              <p className="text-gray-700">{center.workingHours}</p>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700 transition-colors duration-300 ease-in-out"
-                onClick={() => handleSelectCenter(center)}
-              >
-                Select Center
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
       <ToastContainer />
     </>
   );

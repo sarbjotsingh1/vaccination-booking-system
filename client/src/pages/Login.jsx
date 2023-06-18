@@ -13,13 +13,10 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "https://vaccination-booking-system.vercel.app/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        email,
+        password,
+      });
 
       // Handle successful login
       console.log("Logged in:", response.data);

@@ -128,27 +128,27 @@ router.get("/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-router.post("/apply", async (req, res) => {
-  const { centerId, date, name } = req.body;
+// router.post("/apply", async (req, res) => {
+//   const { centerId, date, name } = req.body;
 
-  try {
-    // Create a new vaccination application
-    const newVaccinationApplication = new VaccinationApplication({
-      center: centerId,
-      date,
-      name,
-    });
+//   try {
+//     // Create a new vaccination application
+//     const newVaccinationApplication = new VaccinationApplication({
+//       center: centerId,
+//       date,
+//       name,
+//     });
 
-    await newVaccinationApplication.save();
+//     await newVaccinationApplication.save();
 
-    return res
-      .status(201)
-      .json({ message: "Vaccination application submitted successfully" });
-  } catch (error) {
-    console.error("Error submitting vaccination application:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
+//     return res
+//       .status(201)
+//       .json({ message: "Vaccination application submitted successfully" });
+//   } catch (error) {
+//     console.error("Error submitting vaccination application:", error);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// });
 
 // GET /vaccination-application/slots-booked?centerId=<centerId>&date=<date>
 router.get("/slots-booked", async (req, res) => {
@@ -183,6 +183,159 @@ router.get("/slots-booked", async (req, res) => {
   } catch (error) {
     console.error("Error retrieving slots booked:", error);
     res.status(500).json("Internal server error");
+  }
+});
+
+router.post("/:id/slots", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, availableSlots } = req.body;
+
+    const vaccinationCenter = await VaccinationCenter.findById(id);
+
+    if (!vaccinationCenter) {
+      return res.status(404).json({ message: "Vaccination center not found" });
+    }
+
+    vaccinationCenter.slots.push({ date, availableSlots });
+    await vaccinationCenter.save();
+
+    return res.status(201).json({ message: "Slots added successfully" });
+  } catch (error) {
+    console.error("Error adding slots:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get Available Slots for a Date
+router.get("/:id/slots/:date", async (req, res) => {
+  try {
+    const { id, date } = req.params;
+
+    const vaccinationCenter = await VaccinationCenter.findById(id);
+
+    if (!vaccinationCenter) {
+      return res.status(404).json({ message: "Vaccination center not found" });
+    }
+
+    const slot = vaccinationCenter.slots.find(
+      (slot) => slot.date.toISOString() === date
+    );
+
+    if (!slot) {
+      return res
+        .status(404)
+        .json({ message: "Slots not found for the specified date" });
+    }
+
+    return res.status(200).json({ availableSlots: slot.availableSlots });
+  } catch (error) {
+    console.error("Error retrieving slots:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Book a Slot
+router.post("/:id/book-slot", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date } = req.body;
+
+    const vaccinationCenter = await VaccinationCenter.findById(id);
+
+    if (!vaccinationCenter) {
+      return res.status(404).json({ message: "Vaccination center not found" });
+    }
+
+    const slot = vaccinationCenter.slots.find(
+      (slot) => slot.date.toISOString() === date
+    );
+
+    if (!slot) {
+      return res
+        .status(404)
+        .json({ message: "Slots not found for the specified date" });
+    }
+
+    if (slot.availableSlots === 0) {
+      return res
+        .status(400)
+        .json({ message: "No available slots for the specified date" });
+    }
+
+    slot.availableSlots--;
+    await vaccinationCenter.save();
+
+    return res.status(200).json({ message: "Slot booked successfully" });
+  } catch (error) {
+    console.error("Error booking slot:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/slot-booking", async (req, res) => {
+  try {
+    const { centerId, date } = req.query;
+    const slotsBooked = await SlotBooking.countDocuments({
+      center: centerId,
+      date: new Date(date),
+    });
+    res.status(200).json({ slotsBooked });
+  } catch (error) {
+    console.error("Error retrieving slots booked:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const vaccinationCenters = await VaccinationCenter.find();
+    res.status(200).json({ vaccinationCenters });
+  } catch (error) {
+    console.error("Error fetching vaccination centers:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Search vaccination centers
+router.get("/search", async (req, res) => {
+  try {
+    const { searchQuery } = req.query;
+    const vaccinationCenters = await VaccinationCenter.find({
+      $or: [
+        { name: { $regex: searchQuery, $options: "i" } },
+        { city: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+    res.status(200).json({ vaccinationCenters });
+  } catch (error) {
+    console.error("Error searching vaccination centers:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Apply for a slot at a vaccination center
+router.post("/apply", async (req, res) => {
+  try {
+    const { centerId, date, name } = req.body;
+    const center = await VaccinationCenter.findById(centerId);
+    if (!center) {
+      return res.status(404).json({ message: "Vaccination center not found" });
+    }
+    const slot = center.slots.find(
+      (s) => s.date.getTime() === new Date(date).getTime()
+    );
+    if (!slot || slot.availableSlots <= 0) {
+      return res
+        .status(400)
+        .json({ message: "No available slots for the selected date" });
+    }
+    slot.availableSlots -= 1;
+    await center.save();
+    res.status(200).json({ message: "Slot booked successfully" });
+  } catch (error) {
+    console.error("Error applying for vaccination slot:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
