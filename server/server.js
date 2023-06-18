@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const authRoutes = require("./routes/auth");
+//const authRoutes = require("./routes/auth");
 const vaccinationCenterRoutes = require("./routes/vaccinationCenter.js");
 const vaccinationApplicationsRouter = require("./routes/vaccinationApplication");
 
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/auth", authRoutes);
+//app.use("/auth", authRoutes);
 app.use("/vaccination-center", vaccinationCenterRoutes);
 app.use("/vaccination-applications", vaccinationApplicationsRouter);
 
