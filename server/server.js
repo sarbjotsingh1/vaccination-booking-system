@@ -19,6 +19,10 @@ app.use(
   })
 );
 
+app.get("/", (req, res) => {
+  res.send("<h1>Working fine</h1>");
+});
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5176"); // Replace with the origin of your frontend application
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
