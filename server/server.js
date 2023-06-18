@@ -53,4 +53,17 @@ mongoose
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
+    process.exit(1); // Exit the process with a non-zero code to indicate failure
   });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+// Handle unhandled promise rejections globally
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Promise Rejection:", err);
+  process.exit(1); // Exit the process with a non-zero code to indicate failure
+});
