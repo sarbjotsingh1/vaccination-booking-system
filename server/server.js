@@ -2,29 +2,25 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-//const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/auth");
 const vaccinationCenterRoutes = require("./routes/vaccinationCenter.js");
 const vaccinationApplicationsRouter = require("./routes/vaccinationApplication");
+const dbConnect = require("./config/dbConnect");
+const bodyParser = require("body-parser");
 
 const app = express();
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(cors());
 const PORT = 3000;
 
-app.use(express.json());
-app.use(cors());
-
-app.use(
-  cors({
-    origin: "http://localhost:5176",
-    credentials: true,
-  })
-);
-
-app.get("/", (req, res) => {
-  res.send("<h1>Working fine</h1>");
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
+dbConnect();
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5176"); // Replace with the origin of your frontend application
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Replace with the origin of your frontend application
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true"); // Allow credentials (cookies)
@@ -32,38 +28,6 @@ app.use((req, res, next) => {
   next();
 });
 
-//app.use("/auth", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/vaccination-center", vaccinationCenterRoutes);
 app.use("/vaccination-applications", vaccinationApplicationsRouter);
-
-// Connect to MongoDB
-mongoose
-  .connect(
-    "mongodb+srv://sarb:yOiBhMEGZJnC8wen@covid.4f3ru88.mongodb.net/?retryWrites=true&w=majority",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-    process.exit(1); // Exit the process with a non-zero code to indicate failure
-  });
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
-});
-
-// Handle unhandled promise rejections globally
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Promise Rejection:", err);
-  process.exit(1); // Exit the process with a non-zero code to indicate failure
-});
