@@ -1,17 +1,17 @@
 /* eslint-disable no-undef */
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const authRoutes = require("./routes/auth");
+// const mongoose = require("mongoose");
+// const cors = require("cors");
+// const authRoutes = require("./routes/auth");
 const vaccinationCenterRoutes = require("./routes/vaccinationCenter.js");
-const vaccinationApplicationsRouter = require("./routes/vaccinationApplication");
+//const vaccinationApplicationsRouter = require("./routes/vaccinationApplication");
 const dbConnect = require("./config/dbConnect");
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 
 const app = express();
 app.use(express.json());
-app.use(bodyParser.json());
-app.use(cors());
+//app.use(bodyParser.json());
+//app.use(cors());
 const PORT = 3000;
 
 app.listen(PORT, () => {
@@ -28,6 +28,6 @@ dbConnect();
 //   next();
 // });
 
-app.use("/auth", authRoutes);
+//app.use("/auth", authRoutes);
 app.use("/vaccination-center", vaccinationCenterRoutes);
-app.use("/vaccination-applications", vaccinationApplicationsRouter);
+//app.use("/vaccination-applications", vaccinationApplicationsRouter);
