@@ -1,4 +1,3 @@
-// SearchVaccinationCenter.js
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -18,7 +17,6 @@ const SearchVaccinationCenter = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [slotsBooked, setSlotsBooked] = useState(0);
 
   useEffect(() => {
     fetchVaccinationCenters();
@@ -58,41 +56,27 @@ const SearchVaccinationCenter = () => {
 
   const handleSelectDate = (date) => {
     setSelectedDate(date);
-    if (selectedCenter) {
-      fetchSlotsBooked(selectedCenter._id, date);
-    }
-  };
-
-  const fetchSlotsBooked = async (centerId, date) => {
-    try {
-      const response = await api.get("/vaccination-center/slot-booking", {
-        params: {
-          centerId,
-          date,
-        },
-      });
-      setSlotsBooked(response.data.slotsBooked);
-    } catch (error) {
-      console.error("Error retrieving slots booked:", error);
-      setSlotsBooked(0);
-    }
   };
 
   const handleApply = async () => {
-    if (
-      selectedCenter &&
-      selectedDate &&
-      slotsBooked < selectedCenter.maxCandidatesPerDay &&
-      name
-    ) {
+    if (selectedCenter && selectedDate && name) {
       setLoading(true);
       try {
-        const response = await api.post("/vaccination-center/apply", {
+        const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+        const formattedDate = selectedDate.toLocaleDateString("en-US", options);
+        console.log(formattedDate);
+        const response = await api.post("/vaccination-applications/apply", {
           centerId: selectedCenter._id,
-          date: selectedDate,
+          date: formattedDate,
           name: name,
         });
-        toast.success("Application submitted successfully!");
+
+        if (response.status === 201) {
+          toast.success("Application submitted successfully!");
+        } else {
+          toast.error("Slots are full!");
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error applying for vaccination slot:", error);
@@ -120,7 +104,7 @@ const SearchVaccinationCenter = () => {
 
   return (
     <>
-      <div className="max-w-md p-4 gap-4">
+      <div className="max-w-full p-4 gap-4">
         <div className="flex mb-4">
           <Link to="/user-dashboard">
             <h1 className="text-3xl font-bold text-blue-700 cursor-pointer">
@@ -157,9 +141,6 @@ const SearchVaccinationCenter = () => {
               className="flex-grow px-4 py-2 mb-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {renderDatePicker()}
-            <p>
-              Slots Booked: {slotsBooked}/{selectedCenter.maxCandidatesPerDay}
-            </p>
             <button
               onClick={handleApply}
               disabled={loading}
@@ -173,11 +154,11 @@ const SearchVaccinationCenter = () => {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div>
+          <div className="grid grid-cols-3 gap-4">
             {vaccinationCenters.length === 0 ? (
               <p>No vaccination centers found.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-4">
+              <>
                 {vaccinationCenters.map((center) => (
                   <div
                     key={center._id}
@@ -195,7 +176,7 @@ const SearchVaccinationCenter = () => {
                     </p>
                   </div>
                 ))}
-              </div>
+              </>
             )}
           </div>
         )}

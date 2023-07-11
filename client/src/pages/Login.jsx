@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/tailwind.css";
 import { ArrowRight } from "lucide-react";
+import Cookies from "js-cookie";
+import vacci from "../assets/vacci.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +19,11 @@ const Login = () => {
         email,
         password,
       });
+      console.log(response.data);
+      const { token } = response.data;
+
+      // Store the token in a cookie
+      Cookies.set("token", token, { expires: 1 });
 
       // Handle successful login
       console.log("Logged in:", response.data);
@@ -47,7 +54,7 @@ const Login = () => {
             <p className="mt-2 text-sm text-gray-600">
               Don&apos;t have an account?{" "}
               <a
-                href="#"
+                href="/signup"
                 title=""
                 className="font-semibold text-black transition-all duration-200 hover:underline"
               >
@@ -109,7 +116,7 @@ const Login = () => {
         <div className="h-screen w-full">
           <img
             className="mx-auto h-full w-full rounded-md object-cover"
-            src="https://images.unsplash.com/photo-1630673245362-f69d2b93880e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+            src={vacci}
             alt=""
           />
         </div>

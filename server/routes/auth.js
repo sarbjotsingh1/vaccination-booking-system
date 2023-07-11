@@ -1,9 +1,7 @@
 /* eslint-disable no-undef */
 const express = require("express");
-const cookie = require("cookie");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const config = require("../config");
 const User = require("../models/User.js");
 
 const router = express.Router();
@@ -25,81 +23,63 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Check if the user is an admin (You can modify this logic based on your requirements)
-    const isAdmin = user.isAdmin;
-
     // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, config.jwtSecret, {
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-
-    // Store the token and isAdmin as cookies
-    const cookieOptions = {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 3600, // 1 hour (in seconds)
-      path: "/", // Set the cookie path to the root
-    };
-
-    res.setHeader("Set-Cookie", [
-      cookie.serialize("jwt", token, cookieOptions),
-      cookie.serialize("isAdmin", String(isAdmin), cookieOptions),
-    ]);
-
-    return res.status(200).json({ token, isAdmin });
+      maxAge: 72 * 60 * 60 * 1000,
+    });
+    res.json({
+      _id: user?._id,
+      firstname: user?.firstname,
+      email: user?.email,
+      mobile: user?.mobile,
+      token: token,
+    });
   } catch (error) {
     console.error("Error logging in:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Admin login endpoint
-router.post("/auth-login", async (req, res) => {
+// // Admin login endpoint
+router.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid email" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Validate the password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Check if the user is an admin
     const isAdmin = user.isAdmin;
-
     if (!isAdmin) {
-      return res
-        .status(401)
-        .json({ message: "Only admins are allowed access" });
+      return res.status(401).json({ message: "You are not admin" });
     }
-
     // Generate a JWT token
-    const token = jwt.sign({ userId: user._id }, config.jwtSecret, {
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-
-    // Store the token and isAdmin as cookies
-    const cookieOptions = {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 3600, // 1 hour (in seconds)
-      path: "/", // Set the cookie path to the root
-    };
-
-    res.setHeader("Set-Cookie", [
-      cookie.serialize("jwt", token, cookieOptions),
-      cookie.serialize("isAdmin", String(isAdmin), cookieOptions),
-    ]);
-
-    return res.status(200).json({ token, isAdmin });
+      maxAge: 72 * 60 * 60 * 1000,
+    });
+    res.json({
+      _id: user?._id,
+      firstname: user?.firstname,
+      email: user?.email,
+      mobile: user?.mobile,
+      token: token,
+    });
   } catch (error) {
     console.error("Error logging in:", error);
     return res.status(500).json({ message: "Internal server error" });

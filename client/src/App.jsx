@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import AddVaccinationCenter from "./pages/AddVaccinationCenter";
 import VaccinationCenter from "./pages/VaccinationCenter";
 import SearchVaccinationCenter from "./pages/SearchVaccinationCenter";
-import VaccinationSlot from "./pages/VaccinationSlot";
+import VaccinationApplications from "./pages/VaccinationApplications";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminDashBoard from "./pages/AdminDashBoard";
 import UserDashBoard from "./pages/userDashBoard";
@@ -33,8 +33,8 @@ function App() {
             element={<SearchVaccinationCenter />}
           />
           <Route
-            path="/admin/vaccination-slots"
-            element={<VaccinationSlot />}
+            path="/admin/vaccination-applications"
+            element={<VaccinationApplications />}
           />
 
           <Route path="/admin-dashboard" element={<AdminDashBoard />} />

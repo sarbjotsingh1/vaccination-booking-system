@@ -2,26 +2,43 @@ import { useState } from "react";
 import axios from "axios";
 import "../styles/tailwind.css";
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import vacci from "../assets/vacci.jpg";
+import Cookies from "js-cookie";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/auth-login",
+        "http://localhost:3000/auth/admin-login",
         {
           email,
           password,
         }
       );
+      const { token } = response.data;
+
+      // Store the token in a cookie
+      Cookies.set("token", token, { expires: 1 });
 
       // Handle successful login
       console.log("Logged in:", response.data);
+
+      // Check the response status or any other criteria to determine successful login
+      if (response.status === 200) {
+        // Handle successful login
+        console.log("Logged in:", response.data);
+        navigate("/admin-dashboard");
+      } else {
+        // Handle unsuccessful login
+        console.error("Login failed:", response.data);
+      }
     } catch (error) {
       // Handle login error
       console.error("Login failed:", error.message);
@@ -78,14 +95,12 @@ const AdminLogin = () => {
                   </div>
                 </div>
                 <div>
-                  <Link to="/admin-dashboard">
-                    <button
-                      type="submit"
-                      className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
-                    >
-                      Get started <ArrowRight className="ml-2" size={16} />
-                    </button>
-                  </Link>
+                  <button
+                    type="submit"
+                    className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
+                  >
+                    Get started <ArrowRight className="ml-2" size={16} />
+                  </button>
                 </div>
               </div>
             </form>
@@ -94,7 +109,7 @@ const AdminLogin = () => {
         <div className="h-screen w-full">
           <img
             className="mx-auto h-full w-full rounded-md object-cover"
-            src="https://images.unsplash.com/photo-1630673245362-f69d2b93880e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+            src={vacci}
             alt=""
           />
         </div>

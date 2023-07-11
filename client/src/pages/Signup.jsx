@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import vacci from "../assets/vacci.jpg";
 
 const api = axios.create({
   baseURL: "http://localhost:3000",
@@ -11,22 +12,11 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Form validation
-    if (!name || !email || !password) {
-      setError("All fields are required");
-      return;
-    }
-
     try {
-      setLoading(true);
-      setError("");
-
       // Send API request to the backend
       const response = await api.post("/auth/signup", {
         name,
@@ -43,9 +33,6 @@ const Signup = () => {
       setPassword("");
     } catch (error) {
       console.error(error);
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -145,7 +132,7 @@ const Signup = () => {
         <div className="h-full w-full">
           <img
             className="mx-auto h-screen w-full rounded-md object-cover"
-            src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1742&q=80"
+            src={vacci}
             alt=""
           />
         </div>
