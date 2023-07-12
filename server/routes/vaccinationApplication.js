@@ -7,7 +7,7 @@ const router = express.Router();
 router.post(
   "/apply",
   async (req, res) => {
-    const { centerId, date, name } = req.body;
+    const { centerId, date, name, centerName } = req.body;
 
     try {
       // Check if an application already exists for the center and date
@@ -28,6 +28,7 @@ router.post(
         // Create a new vaccination application
         const newVaccinationApplication = new VaccinationApplication({
           center: centerId,
+          centerName: centerName,
           date,
           slots: [name],
           count: 1,
@@ -46,7 +47,7 @@ router.post(
   authMiddleware
 );
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, isAdmin, async (req, res) => {
   try {
     const applications = await VaccinationApplication.find();
     res.json(applications);

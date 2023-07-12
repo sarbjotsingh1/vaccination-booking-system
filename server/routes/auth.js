@@ -29,7 +29,7 @@ router.post("/login", async (req, res) => {
     });
     res.cookie("token", token, {
       httpOnly: true,
-      maxAge: 72 * 60 * 60 * 1000,
+      maxAge: 60 * 60 * 1000,
     });
     res.json({
       _id: user?._id,
@@ -90,10 +90,8 @@ router.post("/admin-login", async (req, res) => {
 router.post("/logout", (req, res) => {
   // Clear the authentication token from client-side (e.g., cookies, local storage)
 
-  // Assuming you are using JWT and have a token stored in a cookie
-  res.clearCookie("jwt");
+  res.clearCookie("token");
 
-  // Send a response indicating successful logout
   res.json({ message: "Logout successful" });
 });
 

@@ -15,9 +15,9 @@ const AdminDashboard = () => {
               Vaccination Centers
             </button>
           </Link>
-          <Link to="/vaccination-slots">
+          <Link to="/admin/vaccination-applications">
             <button className="bg-green-600 text-white px-6 py-3 rounded-md text-lg font-medium shadow-md">
-              Vaccination Slots
+              Vaccination Applications
             </button>
           </Link>
           <Link to="/">

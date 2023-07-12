@@ -67,6 +67,7 @@ const SearchVaccinationCenter = () => {
         console.log(formattedDate);
         const response = await api.post("/vaccination-applications/apply", {
           centerId: selectedCenter._id,
+          centerName: selectedCenter,
           date: formattedDate,
           name: name,
         });
