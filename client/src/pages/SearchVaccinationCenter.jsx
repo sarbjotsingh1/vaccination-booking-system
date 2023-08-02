@@ -4,6 +4,7 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ToastContainer, toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 import "react-toastify/dist/ReactToastify.css";
 
 const api = axios.create({
@@ -17,6 +18,7 @@ const SearchVaccinationCenter = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cookies] = useCookies(["token"]);
 
   useEffect(() => {
     fetchVaccinationCenters();
@@ -25,7 +27,14 @@ const SearchVaccinationCenter = () => {
   const fetchVaccinationCenters = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/vaccination-center");
+      const response = await api.get(
+        "/vaccination-center"
+        // , {
+        //   // headers: {
+        //   //   Authorization: `Bearer ${cookies.token}`,
+        //   // },
+        // }
+      );
       setVaccinationCenters(response.data.vaccinationCenters);
       setLoading(false);
     } catch (error) {
@@ -65,12 +74,20 @@ const SearchVaccinationCenter = () => {
         const options = { year: "numeric", month: "2-digit", day: "2-digit" };
         const formattedDate = selectedDate.toLocaleDateString("en-US", options);
         console.log(formattedDate);
-        const response = await api.post("/vaccination-applications/apply", {
-          centerId: selectedCenter._id,
-          centerName: selectedCenter,
-          date: formattedDate,
-          name: name,
-        });
+        const response = await api.post(
+          "/vaccination-applications/apply",
+          {
+            centerId: selectedCenter._id,
+            centerName: selectedCenter.name,
+            date: formattedDate,
+            name: name,
+          }
+          // {
+          //   headers: {
+          //     Authorization: `Bearer ${cookies.token}`,
+          //   },
+          // }
+        );
 
         if (response.status === 201) {
           toast.success("Application submitted successfully!");

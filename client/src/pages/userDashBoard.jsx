@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useCookies } from "react-cookie";
 import axios from "axios";
 
 const api = axios.create({
@@ -6,17 +7,15 @@ const api = axios.create({
 });
 
 const UserDashboard = () => {
+  const [cookies, removeCookie] = useCookies(["token"]);
+
   const handleLogout = async () => {
     try {
       // Send a request to the backend API to perform logout
       await api.post("/auth/logout", null, { withCredentials: true });
-
-      // Redirect the user to the login page or homepage
-      // You can use the useHistory hook from react-router-dom
-      // to navigate to a specific route after logout
+      removeCookie("token");
     } catch (error) {
       console.error("Error logging out:", error);
-      // Handle error if logout fails
     }
   };
 

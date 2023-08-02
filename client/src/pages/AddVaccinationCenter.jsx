@@ -1,8 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
 import { AdminNavBar } from "../componets/AdminNavBar";
+// import { useCookies } from "react-cookie";
 
 const AddVaccinationCenter = () => {
+  // const [cookies] = useCookies(["token"]);
+
   const [formData, setFormData] = useState({
     ID: "",
     name: "",
